@@ -1,0 +1,43 @@
+# Codecov configuration — coverage status is tracked per area:
+#   check "scripts" -> scripts/ (Typer CLI: cli.py, commands/*)
+#   check "skills"  -> skills/  (shipped runtime + per-skill executables)
+# Tests themselves are never counted (see `ignore`).
+#
+# One coverage.xml is produced by pytest-cov (`pixi run test`) and uploaded
+# once from CI via `pixi run cov-upload` (codecov-cli from PyPI).
+# Public repo: tokenless upload works from GitHub Actions.
+# Private repo: add a CODECOV_TOKEN secret (repository upload token).
+
+codecov:
+  require_ci_to_pass: true
+  notify:
+    wait_for_ci: true
+
+coverage:
+  range: "70...100"
+  round: down
+  precision: 1
+  status:
+    project:
+      scripts: # coverage of scripts/ may not regress by >2%
+        target: auto
+        threshold: 2%
+        paths: ["scripts/"]
+      skills: # shipped skill runtime: keep it honest but lenient
+        target: auto
+        threshold: 2%
+        paths: ["skills/"]
+    patch:
+      default: # new/changed code should mostly be exercised
+        target: 60%
+        threshold: 0%
+
+ignore:
+  - "tests/"
+  - ".agents/"
+
+comment:
+  layout: "diff, files"
+  behavior: default
+  require_base: false
+  require_head: false

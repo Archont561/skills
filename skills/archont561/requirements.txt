@@ -1,0 +1,6 @@
+# Optional enhancement deps for archont561. Installed by:
+#   archont561 setup --deps
+# into an isolated venv at ~/.archont561/venv (never into your project env).
+# The runtime works without them (stdlib fallback output).
+typer>=0.12
+rich>=13

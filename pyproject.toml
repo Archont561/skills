@@ -1,0 +1,36 @@
+# Coverage configuration for `pixi run test` (pytest-cov -> coverage.py).
+# Two areas feed the Codecov flags of the same names (see codecov.yml):
+#   scripts/ — repo tooling (Typer CLI, lint/format commands)
+#   skills/  — shipped runtime (installer, __main__, skill executables)
+# tests/ is instrumentation, not a source; it is never measured (also dropped
+# by the --include filters on `coverage report` and at Codecov via `ignore:`).
+#
+# NOTE: no `source` filter here on purpose. pytest-cov passes --cov=scripts
+# --cov=skills for the main process, but test subprocesses run tmp *copies*
+# of skills/ (isolation) and are armed only via COVERAGE_PROCESS_START ->
+# this file; a `source` filter would discard their measurement before the
+# [tool.coverage.paths] remap below can attribute it to skills/.
+
+[tool.coverage.run]
+branch = true
+relative_files = true
+# Every python process (pytest + skill subprocesses) writes its own
+# .coverage.* shard — plain .coverage writes clobber each other.
+parallel = true
+
+# Tests copy skills into tmp dirs and run them there (isolation); the trees
+# are identical, so remap those paths back onto the real sources for Codecov.
+[tool.coverage.paths]
+engine = ["skills/archont561", "*/archont561"]
+hello = ["skills/hello", "*/hello"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_also = [
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+  "raise NotImplementedError",
+]
+
+[tool.coverage.xml]
+output = "coverage.xml"

@@ -1,0 +1,17 @@
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.py[cod]
+.DS_Store
+
+# pixi environment (pixi.lock IS committed for reproducibility)
+.pixi/
+
+# node / backlog.md
+node_modules/
+
+# coverage artifacts (coverage.xml + per-flag splits consumed by Codecov)
+.coverage
+.coverage.*
+coverage.xml
+coverage-*.xml

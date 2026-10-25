@@ -1,0 +1,56 @@
+# convco configuration (https://convco.github.io/configuration)
+# Loaded by all convco commands: `convco check` (lefthook commit-msg + CI) and
+# `convco changelog`/`convco version`. YAML form of the conventional-changelog
+# config spec; must live at the repo root as `.versionrc`.
+#
+# host/owner/repository are auto-detected from `git remote get-url origin`
+# and feed commitUrlFormat / compareUrlFormat / issueUrlFormat defaults.
+---
+header: |
+  # Changelog
+
+  All notable changes to this project are documented here. Generated with
+  [convco](https://convco.github.io) from conventional commits.
+
+# Commit types accepted by `convco check` and their changelog mapping.
+# hidden: true -> still valid in messages, kept out of the changelog
+# (visible with `convco changelog --include-hidden-sections`).
+types:
+  - type: feat
+    section: Features
+    hidden: false
+  - type: fix
+    section: Bug Fixes
+    hidden: false
+  - type: perf
+    section: Performance
+    hidden: false
+  - type: docs
+    section: Documentation
+    hidden: false # docs are first-class in a skills registry
+  - type: revert
+    section: Reverts
+    hidden: false
+  - type: refactor
+    section: Code Refactoring
+    hidden: false
+  - type: build
+    section: Build System
+    hidden: true
+  - type: chore
+    section: Chores
+    hidden: true
+  - type: ci
+    section: Continuous Integration
+    hidden: true
+  - type: style
+    section: Styling
+    hidden: true
+  - type: test
+    section: Tests
+    hidden: true
+
+# Pre-1.0 semantics: breaking changes bump 0.(x+1).0 until the first major.
+preMajor: true
+issuePrefixes:
+  - "#"

@@ -1,0 +1,5 @@
+[lint.per-file-ignores]
+# Skill directories are hyphenated per the agentskills.io naming convention
+# and their Python files are loaded by file path, never imported as modules —
+# the N999 module-name rule does not apply to shipped skill code.
+"skills/**/*.py" = ["N999"]

@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # convco needs full history to compute the range
+      - uses: prefix-dev/setup-pixi@v0.9.6
+
+      # every step runs inside the locked pixi environment
+      - run: pixi run lint
+      - run: pixi run lint-md      # pymarkdownlnt: MD041/MD043 per skill docs
+      - run: pixi run check --strict   # repo structure/boundary rules
+      - run: pixi run actionlint
+      - run: pixi run test          # pytest-cov: term + coverage.xml
+      - name: Upload coverage to Codecov
+        run: pixi run cov-upload
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }} # optional for public repos
+      - run: pixi run scripts # smoke: python -m scripts prints hello world
+
+      # All commits introduced by this change must be conventional commits.
+      - name: Conventional commits introduced by this push
+        # event.before is all-zeros on a repo's very first push — nothing to range-check
+        if: github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000'
+        run: pixi run convco check ${{ github.event.before }}..HEAD --first-parent
+      - name: Fetch base branch for commit linting (PR)
+        if: github.event_name == 'pull_request'
+        run: pixi run git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+      - name: Conventional commits introduced by this PR
+        if: github.event_name == 'pull_request'
+        run: pixi run convco check origin/main..HEAD --first-parent
+
+  spec:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: prefix-dev/setup-pixi@v0.9.6
+      - name: Validate skills against the Agent Skills spec
+        run: pixi run gh skill publish --dry-run
+        env:
+          GH_TOKEN: ${{ github.token }}

@@ -1,0 +1,36 @@
+# Git hooks managed by lefthook — https://lefthook.dev
+# Install once per clone: pixi run setup
+# Every hook runs inside the pixi environment (pixi run ...).
+
+commit-msg:
+  # Lint the message being committed: must be a conventional commit.
+  # {1} is the path to the commit message file; convco reads it via stdin.
+  commands:
+    conventional-commit:
+      run: pixi run convco check --from-stdin --strip < {1}
+
+pre-commit:
+  # Commands run sequentially (default) so ruff --fix and format don't race.
+  commands:
+    ruff-lint:        # lint + autofix the staged Python files, re-stage fixes
+      glob: "**/*.py"
+      run: pixi run ruff check --fix {staged_files}
+      stage_fixed: true
+    ruff-format:      # format the staged Python files, re-stage fixes
+      glob: "**/*.py"
+      run: pixi run ruff format {staged_files}
+      stage_fixed: true
+    actionlint:       # lint staged GitHub workflow files
+      glob: ".github/workflows/*.{yml,yaml}"
+      run: pixi run actionlint {staged_files}
+    pymarkdown:       # markdown hygiene on staged skill docs
+      glob: "skills/**/*.md"
+      run: pixi run lint-md
+    repo-structure:   # skills boundary + required sections/files
+      run: pixi run check
+
+pre-push:
+  commands:
+    affected-tests:   # run the tests whose files are part of this push
+      glob: "tests/**/*.py"
+      run: pixi run pytest -v {push_files}

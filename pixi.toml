@@ -1,0 +1,45 @@
+[workspace]
+authors = ["<ORG>"]
+channels = ["conda-forge"]
+description = "Agent skills registry (skills/<name>/SKILL.md) managed with pixi"
+name = "org-skills"
+platforms = ["linux-64", "osx-arm64", "win-64"]
+version = "0.1.0"
+
+[dependencies]
+python = "3.13.*"
+pytest = ">=8"
+pytest-cov = ">=4"
+ruff = ">=0.6"
+git = ">=2"
+nodejs = ">=24"
+lefthook = ">=1"
+actionlint = ">=1.7"
+convco = ">=0.5"
+gh = ">=2.90"
+typer = ">=0.12"
+rich = ">=13"
+pyyaml = ">=6"
+
+[pypi-dependencies]
+pymarkdownlnt = ">=0.9"
+codecov-cli = ">=9"
+
+[tasks]
+# CI only: single combined report; codecov.yml splits status per path.
+# CODECOV_TOKEN needed only for private repos.
+cov-upload = "codecovcli upload-process --disable-search --fail-on-error -f coverage.xml"
+lint = "ruff check scripts tests skills"
+lint-md = "pymarkdownlnt --config .pymarkdown.skill.json scan skills/*/SKILL.md && pymarkdownlnt --config .pymarkdown.readme.json scan skills/*/README.md"
+check = "python -m scripts.cli lint"
+fmt = "python -m scripts.cli lint --fix"
+scripts = "python -m scripts"
+setup = "lefthook install"
+
+[tasks.test]
+# pytest-cov is the coverage engine. COVERAGE_PROCESS_START arms conda-forge's
+# a1_coverage.pth so python subprocesses (skills run via `python <dir>`) are
+# measured too; parallel shards are auto-combined by pytest-cov, and pyproject's
+# [tool.coverage.paths] remaps tmp-copy skill trees back onto skills/.
+cmd = "pytest tests/ -v --cov=scripts --cov=skills --cov-report=term --cov-report=xml:coverage.xml"
+env = { COVERAGE_PROCESS_START = "pyproject.toml" }
